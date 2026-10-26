@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HookViral AI - Generador de Ganchos y Guiones Virales</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    },
+                    boxShadow: {
+                        'indigo-glow': '0 0 30px -5px rgba(99, 102, 241, 0.4)',
+                        'purple-glow': '0 0 30px -5px rgba(168, 85, 247, 0.4)',
+                        'emerald-glow': '0 0 30px -5px rgba(16, 185, 129, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+        
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s ease;
+        }
+        .glass-card-hover:hover {
+            border-color: rgba(99, 102, 241, 0.35);
+            box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.25);
+        }
+
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 0.15; transform: scale(1); }
+            50% { opacity: 0.35; transform: scale(1.08); }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 7s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white relative overflow-x-hidden">
+
+    <!-- Ambient Glow Background -->
+    <div class="fixed top-0 left-1/4 w-96 h-96 bg-indigo-600/15 rounded-full blur-[120px] pointer-events-none animate-pulse-slow"></div>
+    <div class="fixed bottom-10 right-1/4 w-96 h-96 bg-purple-600/15 rounded-full blur-[120px] pointer-events-none animate-pulse-slow" style="animation-delay: 3.5s;"></div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-6 right-6 z-50 transform translate-y-[-120%] opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 bg-slate-900/95 border border-indigo-500/40 text-white px-5 py-3.5 rounded-xl shadow-2xl backdrop-blur-xl">
+        <div class="h-8 w-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+            <i class="fa-solid fa-circle-check text-base"></i>
+        </div>
+        <div>
+            <p id="toast-title" class="text-xs font-bold text-slate-400">Notificación</p>
+            <p id="toast-message" class="text-sm font-semibold text-slate-100">¡Texto copiado con éxito!</p>
+        </div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="scrollToTop()">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-indigo-glow">
+                    <i class="fa-solid fa-bolt text-white text-lg"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xl font-black tracking-tight text-white flex items-center gap-2">
+                        HookViral <span class="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">AI</span>
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-medium">Plataforma Micro-SaaS</span>
+                </div>
+            </div>
+            
+            <!-- Controls & Subscription Plan Status -->
+            <div class="flex items-center gap-3">
+                
+                <!-- Credit Badge / Status -->
+                <div id="credit-status-badge" class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 px-3.5 py-1.5 rounded-xl text-xs font-semibold">
+                    <i class="fa-solid fa-coins text-amber-400"></i>
+                    <span id="credit-text-count" class="text-slate-200">Créditos: <strong class="text-amber-400 font-bold" id="credit-num">3/3</strong></span>
+                </div>
+
+                <!-- Upgrade Button -->
+                <button onclick="openPaywallModal()" class="flex items-center gap-2 text-xs font-bold bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-white px-4 py-2 rounded-xl shadow-indigo-glow transition-all active:scale-95 cursor-pointer">
+                    <i class="fa-solid fa-crown text-amber-200"></i>
+                    <span class="hidden sm:inline">Plan Pro ($9/mes)</span>
+                    <span class="sm:hidden">Pro</span>
+                </button>
+
+                <!-- History Button -->
+                <button onclick="toggleHistoryModal(true)" class="flex items-center gap-2 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-indigo-300 border border-slate-800 px-3.5 py-2 rounded-xl transition-all relative">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span id="history-badge" class="bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-[18px] text-center">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Section -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 z-10">
+        
+        <!-- Hero Header -->
+        <section class="text-center max-w-3xl mx-auto space-y-4">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
+                <i class="fa-solid fa-fire text-indigo-400"></i> Estrategias para TikTok, Reels y Shorts
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+                Ganchos Virales y Guiones <br class="hidden sm:inline">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">Impulsados por Inteligencia Artificial</span>
+            </h1>
+            <p class="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
+                Captura la atención de tu audiencia en los primeros 3 segundos. Genera ganchos de alta retención, guiones estructurados y descripciones optimizadas al instante.
+            </p>
+        </section>
+
+        <!-- Main Form Section -->
+        <section id="generador" class="glass-card rounded-2xl p-6 sm:p-8 shadow-2xl max-w-4xl mx-auto relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+            <form id="hook-form" onsubmit="handleGenerate(event)" class="space-y-6 relative z-10">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- Topic Input -->
+                    <div class="md:col-span-2 space-y-2">
+                        <label for="topic-input" class="block text-xs font-bold uppercase tracking-wider text-slate-300">
+                            Tema, Nicho o Idea del Video <span class="text-indigo-400">*</span>
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="topic-input" 
+                                required
+                                placeholder="Ej: Finanzas personales para jóvenes, Rutina fitness en casa..." 
+                                class="w-full bg-slate-950/90 border border-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-xl px-4 py-3.5 text-white placeholder-slate-500 text-sm transition-all outline-none pl-11"
+                            >
+                            <i class="fa-solid fa-lightbulb absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        </div>
+                    </div>
+
+                    <!-- Platform Selection -->
+                    <div class="space-y-2">
+                        <label for="platform-select" class="block text-xs font-bold uppercase tracking-wider text-slate-300">
+                            Plataforma Objetivo
+                        </label>
+                        <div class="relative">
+                            <select 
+                                id="platform-select"
+                                class="w-full bg-slate-950/90 border border-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-xl px-4 py-3.5 text-white text-sm transition-all outline-none appearance-none pl-11 cursor-pointer"
+                                onchange="updatePlatformIcon(this.value)"
+                            >
+                                <option value="TikTok">TikTok</option>
+                                <option value="Instagram Reels">Instagram Reels</option>
+                                <option value="YouTube Shorts">YouTube Shorts</option>
+                            </select>
+                            <i id="platform-icon" class="fa-brands fa-tiktok absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs pointer-events-none"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit" 
+                    id="submit-btn"
+                    class="w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-4 rounded-xl shadow-indigo-glow flex items-center justify-center gap-3 transition-all duration-200 active:scale-[0.99] cursor-pointer"
+                >
+                    <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                    <span id="btn-text" class="text-base font-semibold">Generar Estrategia Viral</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Loading State Skeleton -->
+        <section id="loading-state" class="hidden max-w-4xl mx-auto space-y-6">
+            <div class="glass-card rounded-2xl p-6 space-y-4 animate-pulse">
+                <div class="h-6 bg-slate-800 rounded w-1/3"></div>
+                <div class="space-y-3">
+                    <div class="h-16 bg-slate-800/60 rounded-xl"></div>
+                    <div class="h-16 bg-slate-800/60 rounded-xl"></div>
+                    <div class="h-16 bg-slate-800/60 rounded-xl"></div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card rounded-2xl p-6 h-64 animate-pulse"></div>
+                <div class="glass-card rounded-2xl p-6 h-64 animate-pulse"></div>
+            </div>
+        </section>
+
+        <!-- Empty State Container -->
+        <section id="empty-state" class="max-w-4xl mx-auto text-center py-16 px-4 border border-dashed border-slate-800 rounded-2xl bg-slate-900/20">
+            <div class="h-16 w-16 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-800 text-indigo-400 shadow-lg">
+                <i class="fa-solid fa-video text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-200">Esperando tu idea de contenido</h3>
+            <p class="text-slate-500 text-sm max-w-md mx-auto mt-1">
+                Ingresa un tema o nicho en el formulario superior para generar 3 ganchos virales, un guión estructurado y descripciones optimizadas.
+            </p>
+        </section>
+
+        <!-- Output Results Container -->
+        <section id="results-container" class="hidden max-w-4xl mx-auto space-y-8">
+            
+            <!-- Result Bar Header -->
+            <div class="flex flex-wrap items-center justify-between gap-4 bg-indigo-950/30 border border-indigo-500/20 p-4 rounded-xl">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-3 w-3 relative">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-xs sm:text-sm font-semibold text-indigo-200">
+                        Estrategia optimizada para <span id="res-platform-tag" class="text-white font-bold underline decoration-indigo-500">TikTok</span>
+                    </span>
+                </div>
+                <button onclick="scrollToGenerator()" class="text-xs text-indigo-300 hover:text-white flex items-center gap-1.5 transition-colors font-medium">
+                    <i class="fa-solid fa-arrows-rotate"></i> Probar otro tema
+                </button>
+            </div>
+
+            <!-- Hooks Block -->
+            <div class="glass-card glass-card-hover rounded-2xl p-6 space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-800/80 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                            <i class="fa-solid fa-magnet text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-white">3 Ganchos Virales de Alta Retención</h2>
+                            <p class="text-slate-400 text-xs">Utiliza uno de estos inicios en los primeros 3 segundos de tu video.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3" id="hooks-list">
+                    <!-- Dynamic hooks injected here -->
+                </div>
+            </div>
+
+            <!-- Script and Caption Split Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Script Block -->
+                <div class="glass-card glass-card-hover rounded-2xl p-6 flex flex-col justify-between space-y-4">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                    <i class="fa-solid fa-scroll text-lg"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-base font-bold text-white">Estructura del Guión</h2>
+                                    <p class="text-slate-400 text-xs">Formato de 30 a 60 segundos</p>
+                                </div>
+                            </div>
+                            <button onclick="copyElementText('script-content', 'Guión')" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 transition-colors" title="Copiar guión completo">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+
+                        <div id="script-content" class="bg-slate-950/80 p-4 rounded-xl border border-slate-800/80 text-slate-300 text-xs sm:text-sm leading-relaxed space-y-3 font-mono">
+                            <!-- Dynamic script injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Caption Block -->
+                <div class="glass-card glass-card-hover rounded-2xl p-6 flex flex-col justify-between space-y-4">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2.5 rounded-xl bg-pink-500/10 text-pink-400 border border-pink-500/20">
+                                    <i class="fa-solid fa-hashtag text-lg"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-base font-bold text-white">Descripción y Hashtags</h2>
+                                    <p class="text-slate-400 text-xs">Optimizado para el algoritmo</p>
+                                </div>
+                            </div>
+                            <button onclick="copyElementText('caption-content', 'Descripción')" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 transition-colors" title="Copiar descripción">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+
+                        <div id="caption-content" class="bg-slate-950/80 p-4 rounded-xl border border-slate-800/80 text-slate-300 text-xs sm:text-sm leading-relaxed whitespace-pre-line">
+                            <!-- Dynamic caption injected here -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- PAYWALL / MONETIZATION MODAL -->
+    <div id="paywall-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-8 max-h-[90vh] overflow-y-auto border border-indigo-500/30 shadow-2xl relative">
+            
+            <!-- Close Button -->
+            <button onclick="closePaywallModal()" class="absolute top-6 right-6 text-slate-400 hover:text-white p-2 rounded-xl bg-slate-900 border border-slate-800 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Paywall Header -->
+            <div class="text-center max-w-lg mx-auto space-y-3">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-bold">
+                    <i class="fa-solid fa-crown"></i> Desbloquea todo el potencial
+                </div>
+                <h2 class="text-2xl sm:text-4xl font-black text-white">Planes de Suscripción</h2>
+                <p class="text-slate-400 text-xs sm:text-sm">
+                    Haz crecer tu cuenta de redes sociales con generaciones ilimitadas e Inteligencia Artificial avanzada.
+                </p>
+            </div>
+
+            <!-- Plans Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Free Plan -->
+                <div class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between space-y-6">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-bold text-white">Plan Gratuito</h3>
+                                <p class="text-slate-400 text-xs">Para creadores principiantes</p>
+                            </div>
+                            <span class="text-xs bg-slate-800 text-slate-300 font-bold px-3 py-1 rounded-lg">Gratis</span>
+                        </div>
+                        <div class="text-3xl font-black text-white">$0 <span class="text-xs text-slate-400 font-normal">/ para siempre</span></div>
+
+                        <ul class="space-y-3 text-xs text-slate-300">
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-check text-emerald-400"></i> 3 créditos diarios automáticos
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-check text-emerald-400"></i> Acceso a TikTok, Reels y Shorts
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-check text-emerald-400"></i> Guiones básicos estructurados
+                            </li>
+                            <li class="flex items-center gap-2.5 text-slate-500 line-through">
+                                <i class="fa-solid fa-xmark text-slate-600"></i> Generaciones ilimitadas
+                            </li>
+                            <li class="flex items-center gap-2.5 text-slate-500 line-through">
+                                <i class="fa-solid fa-xmark text-slate-600"></i> Exportación en PDF
+                            </li>
+                        </ul>
+                    </div>
+
+                    <button onclick="closePaywallModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold py-3 rounded-xl border border-slate-800 text-xs transition-colors">
+                        Continuar con Plan Gratuito
+                    </button>
+                </div>
+
+                <!-- Pro Plan -->
+                <div class="glass-card rounded-2xl p-6 border-2 border-indigo-500/80 bg-gradient-to-b from-indigo-950/30 to-slate-950 flex flex-col justify-between space-y-6 relative shadow-indigo-glow">
+                    
+                    <div class="absolute -top-3 right-6 bg-gradient-to-r from-amber-500 to-indigo-600 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
+                        Recomendado
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-bold text-white">Plan Pro</h3>
+                                <p class="text-indigo-300 text-xs">Para creadores y agencias</p>
+                            </div>
+                        </div>
+                        <div class="text-3xl font-black text-white">$9 <span class="text-xs text-slate-400 font-normal">USD / mes</span></div>
+
+                        <ul class="space-y-3 text-xs text-slate-200">
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-circle-check text-indigo-400"></i> <strong>Generaciones ILIMITADAS</strong>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-circle-check text-indigo-400"></i> Respuestas avanzadas con IA real
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-circle-check text-indigo-400"></i> Historial completo guardado
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-circle-check text-indigo-400"></i> Exportación limpia de guiones
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-circle-check text-indigo-400"></i> Soporte prioritario 24/7
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button onclick="simulateCheckout('Stripe')" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl shadow-indigo-glow flex items-center justify-center gap-2 text-xs transition-all active:scale-95 cursor-pointer">
+                            <i class="fa-brands fa-stripe text-lg"></i> Pagar con Stripe ($9/mes)
+                        </button>
+                        <button onclick="simulateCheckout('Lemon Squeezy')" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold py-2.5 rounded-xl border border-slate-800 flex items-center justify-center gap-2 text-xs transition-colors cursor-pointer">
+                            <i class="fa-solid fa-lemon text-amber-400"></i> Pagar con Lemon Squeezy
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="text-center text-[11px] text-slate-500">
+                <p><i class="fa-solid fa-shield-halved text-emerald-400"></i> Pagos seguros y cifrados. Cancela en cualquier momento sin compromisos.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="history-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl max-w-xl w-full p-6 space-y-5 max-h-[85vh] flex flex-col shadow-2xl border border-slate-700/60">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i> Historial de la Sesión
+                </h3>
+                <button onclick="toggleHistoryModal(false)" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div id="history-list" class="flex-grow overflow-y-auto space-y-3 pr-1">
+                <!-- History Items -->
+            </div>
+
+            <div class="flex justify-between items-center border-t border-slate-800 pt-3">
+                <button onclick="clearHistory()" class="text-xs text-rose-400 hover:text-rose-300 font-semibold transition-colors">
+                    <i class="fa-solid fa-trash-can mr-1"></i> Borrar Historial
+                </button>
+                <button onclick="toggleHistoryModal(false)" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-xl border border-slate-700">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 py-8 text-center text-xs text-slate-500 space-y-2">
+        <p>HookViral AI © 2026 — Plataforma Micro-SaaS para Creadores de Contenido.</p>
+        <p class="text-[11px] text-slate-600">Construido exclusivamente en Español.</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // State Management
+        let userCredits = 3;
+        let isProPlan = false;
+        let sessionHistory = [];
+
+        // Change Platform Icon
+        function updatePlatformIcon(platform) {
+            const icon = document.getElementById('platform-icon');
+            if (platform === 'TikTok') {
+                icon.className = 'fa-brands fa-tiktok absolute left-4 top-1/2 -translate-y-1/2 text-slate-400';
+            } else if (platform === 'Instagram Reels') {
+                icon.className = 'fa-brands fa-instagram absolute left-4 top-1/2 -translate-y-1/2 text-pink-400';
+            } else {
+                icon.className = 'fa-brands fa-youtube absolute left-4 top-1/2 -translate-y-1/2 text-red-500';
+            }
+        }
+
+        // Generator Form Handler
+        function handleGenerate(e) {
+            e.preventDefault();
+            const topic = document.getElementById('topic-input').value.trim();
+            const platform = document.getElementById('platform-select').value;
+
+            if (!topic) return;
+
+            // Credit Check
+            if (!isProPlan && userCredits <= 0) {
+                openPaywallModal();
+                showToast("Has agotado tus 3 créditos diarios gratuitos. ¡Pasa al Plan Pro para continuar!");
+                return;
+            }
+
+            // Deduct Credit if Free User
+            if (!isProPlan) {
+                userCredits--;
+                updateCreditBadge();
+            }
+
+            // UI Loading state
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('results-container').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+
+            const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            btnText.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Generando Inteligencia Viral...`;
+
+            // Simulation of AI Processing
+            setTimeout(() => {
+                const results = generateAIContent(topic, platform);
+
+                // Render Results
+                renderResults(results, platform);
+
+                // Add to History
+                addToHistory({
+                    topic,
+                    platform,
+                    results,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+
+                // Hide Loading UI
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('results-container').classList.remove('hidden');
+
+                // Restore Button
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                btnText.innerText = 'Generar Nueva Variante';
+
+                // Scroll to Results
+                document.getElementById('results-container').scrollIntoView({ behavior: 'smooth' });
+            }, 1000);
+        }
+
+        // Contextual AI Engine (Spanish Only)
+        function generateAIContent(topic, platform) {
+            const cleanTopic = topic.trim();
+            const tagTopic = cleanTopic.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]/g, '');
+
+            const hooks = [
+                `El error número 1 que estás cometiendo en ${cleanTopic} (y cómo solucionarlo hoy).`,
+                `Si quieres dominar ${cleanTopic} este 2026, deja de hacer esto inmediatamente.`,
+                `3 trucos poco conocidos sobre ${cleanTopic} que cambiarán tus resultados.`
+            ];
+
+            const script = `📌 [00:00 - GANCHO]
+"¿Sabías que la mayoría de las personas falla en ${cleanTopic} por cometer un simple error de enfoque?"
+
+💡 [00:05 - CUERPO]
+"Para solucionar esto, aplica este método de 2 pasos:
+Paso 1: Elimina lo innecesario y concéntrate en la consistencia.
+Paso 2: Mide únicamente tus resultados clave semana a semana."
+
+🚀 [00:30 - LLAMADA A LA ACCIÓN]
+"Guarda este video para aplicarlo hoy y sígueme para más consejos sobre ${cleanTopic}."`;
+
+            const caption = `Dominar ${cleanTopic} es mucho más fácil cuando aplicas la estrategia correcta. 🚀\n\n¿Cuál de estos consejos vas a poner en práctica hoy? Cuéntamelo en los comentarios 👇\n\n#${tagTopic} #${platform.replace(/\s+/g, '')} #ContenidoViral #CreadoresDeContenido #EstrategiaDigital`;
+
+            return { hooks, script, caption };
+        }
+
+        // Render Results
+        function renderResults(data, platform) {
+            document.getElementById('res-platform-tag').innerText = platform;
+
+            // Hooks List
+            const hooksList = document.getElementById('hooks-list');
+            hooksList.innerHTML = '';
+            data.hooks.forEach((hook, idx) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between gap-4 bg-slate-950/90 p-4 rounded-xl border border-slate-800/80 hover:border-indigo-500/40 transition-all group';
+                item.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <span class="text-xs font-bold bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-lg border border-indigo-500/30 mt-0.5">#${idx + 1}</span>
+                        <p class="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">${hook}</p>
+                    </div>
+                    <button onclick="copyText('${escapeQuotes(hook)}', 'Gancho #${idx + 1}')" class="text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 p-2.5 rounded-lg border border-slate-800 transition-colors shrink-0" title="Copiar gancho">
+                        <i class="fa-regular fa-copy text-sm"></i>
+                    </button>
+                `;
+                hooksList.appendChild(item);
+            });
+
+            // Script & Caption
+            document.getElementById('script-content').innerText = data.script;
+            document.getElementById('caption-content').innerText = data.caption;
+        }
+
+        // Update Credit Badge
+        function updateCreditBadge() {
+            const badge = document.getElementById('credit-status-badge');
+            const countText = document.getElementById('credit-text-count');
+            
+            if (isProPlan) {
+                badge.className = "flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/40 px-3.5 py-1.5 rounded-xl text-xs font-semibold";
+                countText.innerHTML = `<span class="text-amber-300 font-bold"><i class="fa-solid fa-crown mr-1"></i> Plan Pro Activado (Ilimitado)</span>`;
+            } else {
+                const creditNum = document.getElementById('credit-num');
+                if (creditNum) creditNum.innerText = `${userCredits}/3`;
+            }
+        }
+
+        // Paywall Modal Functions
+        function openPaywallModal() {
+            document.getElementById('paywall-modal').classList.remove('hidden');
+        }
+
+        function closePaywallModal() {
+            document.getElementById('paywall-modal').classList.add('hidden');
+        }
+
+        // Simulate Checkout Process (Stripe / Lemon Squeezy)
+        function simulateCheckout(gateway) {
+            showToast(`Redirigiendo a la pasarela segura de ${gateway}...`);
+            setTimeout(() => {
+                isProPlan = true;
+                updateCreditBadge();
+                closePaywallModal();
+                showToast("¡Felicidades! Te has suscrito con éxito al Plan Pro ($9/mes). Generaciones ilimitadas activadas.");
+            }, 1500);
+        }
+
+        // History Management
+        function addToHistory(item) {
+            sessionHistory.unshift(item);
+            document.getElementById('history-badge').innerText = sessionHistory.length;
+            renderHistoryModal();
+        }
+
+        function renderHistoryModal() {
+            const list = document.getElementById('history-list');
+            if (sessionHistory.length === 0) {
+                list.innerHTML = `<p class="text-center text-slate-500 text-xs py-8">No hay generaciones guardadas en esta sesión.</p>`;
+                return;
+            }
+
+            list.innerHTML = '';
+            sessionHistory.forEach((item, index) => {
+                const el = document.createElement('div');
+                el.className = 'bg-slate-950/90 p-4 rounded-xl border border-slate-800 flex items-center justify-between gap-3';
+                el.innerHTML = `
+                    <div class="overflow-hidden">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">${item.platform}</span>
+                            <span class="text-slate-600 text-[10px]">• ${item.time}</span>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-200 truncate mt-0.5">${item.topic}</p>
+                    </div>
+                    <button onclick="loadHistoryItem(${index})" class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 text-xs font-semibold px-3 py-1.5 rounded-lg border border-indigo-500/30 transition-colors shrink-0">
+                        Cargar
+                    </button>
+                `;
+                list.appendChild(el);
+            });
+        }
+
+        function loadHistoryItem(index) {
+            const item = sessionHistory[index];
+            document.getElementById('topic-input').value = item.topic;
+            document.getElementById('platform-select').value = item.platform;
+            updatePlatformIcon(item.platform);
+
+            renderResults(item.results, item.platform);
+            
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('results-container').classList.remove('hidden');
+
+            toggleHistoryModal(false);
+            document.getElementById('results-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearHistory() {
+            sessionHistory = [];
+            document.getElementById('history-badge').innerText = '0';
+            renderHistoryModal();
+        }
+
+        function toggleHistoryModal(show) {
+            const modal = document.getElementById('history-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        // Helper Copy Functions
+        function copyText(text, label) {
+            copyFallback(text);
+            showToast(`¡${label} copiado al portapapeles!`);
+        }
+
+        function copyElementText(elementId, label) {
+            const text = document.getElementById(elementId).innerText;
+            copyFallback(text);
+            showToast(`¡${label} copiado con éxito!`);
+        }
+
+        function copyFallback(text) {
+            try {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                textarea.style.top = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                return true;
+            } catch (err) {
+                console.error('Copy fallback failed:', err);
+                return false;
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('translate-y-[-120%]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-[-120%]', 'opacity-0');
+            }, 3000);
+        }
+
+        // Navigation Utils
+        function scrollToGenerator() {
+            document.getElementById('topic-input').focus();
+            document.getElementById('generador').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>
